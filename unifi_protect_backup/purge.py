@@ -26,7 +26,7 @@ async def tidy_empty_dirs(base_dir_path):
 async def empty_remote_trash(rclone_remote):
     """ Clean up the remote if possible. Empty the trash or delete old file versions. Not supported by all remotes. """
     returncode, stdout, stderr = await run_command(f'rclone cleanup "{rclone_remote}"')
-    logger.debug(f" Emptying trash for {rclone_remote}")
+    logger.debug(f" Emptied trash for {rclone_remote}")
     if returncode != 0:
         logger.warn("Failed to empty trash. May not be supported by your remote.")
 
