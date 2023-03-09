@@ -120,3 +120,4 @@ data/
 .envrc
 clips/
 *.sqlite
+*.tar
