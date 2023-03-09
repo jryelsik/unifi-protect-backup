@@ -20,7 +20,15 @@ async def delete_file(file_path):
 async def tidy_empty_dirs(base_dir_path):
     returncode, stdout, stderr = await run_command(f'rclone rmdirs -vv --ignore-errors --leave-root "{base_dir_path}"')
     if returncode != 0:
-        logger.warn(f" Failed to tidy empty dirs")
+        logger.warn(" Failed to tidy empty dirs")
+
+
+async def empty_remote_trash(rclone_remote):
+    """ Clean up the remote if possible. Empty the trash or delete old file versions. Not supported by all remotes. """
+    returncode, stdout, stderr = await run_command(f'rclone cleanup "{rclone_remote}"')
+    logger.debug(f" Emptying trash for {rclone_remote}")
+    if returncode != 0:
+        logger.warn("Failed to empty trash. May not be supported by your remote.")
 
 
 class Purge:
@@ -69,7 +77,10 @@ class Purge:
                     await tidy_empty_dirs(self.rclone_destination)
 
             except Exception as e:
-                logger.warn(f"Unexpected exception occurred during purge:", exc_info=e)
+                logger.warn("Unexpected exception occurred during purge:", exc_info=e)
+
+            # Empty trash after purge if supported by remote
+            await empty_remote_trash(self.rclone_destination)
 
             next_purge_time = datetime.now() + self.interval
             logger.extra_debug(f'sleeping until {next_purge_time}')
